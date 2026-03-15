@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Model
 
 /// CurrentWeatherView (location / temp / icon / wind & humidity)
 final class CurrentWeatherView: UIView {
@@ -28,10 +29,10 @@ final class CurrentWeatherView: UIView {
     private func setup() {
 		isHidden = true
 		
-        locationLabel.font = .systemFont(ofSize: 20, weight: .semibold)
-        tempLabel.font     = .systemFont(ofSize: 64, weight: .thin)
+        locationLabel.font = .app20Semibold
+		tempLabel.font     = .app64Thin
         conditionImageView.contentMode = .scaleAspectFit
-        windHumidityLabel.font = .systemFont(ofSize: 16)
+        windHumidityLabel.font = .app15
 
         let stack = UIStackView(arrangedSubviews: [
             locationLabel,
@@ -55,19 +56,12 @@ final class CurrentWeatherView: UIView {
 		NSLayoutConstraint.activate(constraints)
     }
 	
-	func configure(with current: DTOCurrentWeatherResponse) {
+	func configure(with model: CurrentWeather, image: UIImage) {
 		isHidden = false
 		
-		locationLabel.text = "\(current.location.name), \(current.location.country)"
-		tempLabel.text = Measurement(value: Double(current.current.temp_c), unit: UnitTemperature.celsius).formatted()
-		windHumidityLabel.text =
-		"Ветер \(Measurement(value: Double(current.current.wind_kph), unit: UnitSpeed.kilometersPerHour).formatted()) | Влажность \(current.current.humidity)%"
-
-		// Icon
-		if let url = URL(string: "https:"+current.current.condition.icon) {
-			conditionImageView.image = DownloadService.shared.loadImage(from: url) { [weak self] in
-				self?.conditionImageView.image = $0
-			}
-		}
+		locationLabel.text = model.location
+		tempLabel.text = model.temperature.formatted()
+		windHumidityLabel.text = "Ветер \(model.windSpeed.formatted()) | Влажность \(model.humidity)%"
+		conditionImageView.image = image
 	}
 }

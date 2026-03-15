@@ -7,8 +7,12 @@
 
 import UIKit
 import CoreLocation
+import Model
+import ServiceImplementations
 
 final class WeatherViewController: UIViewController {
+	private let model = Model(services: Services())
+	private var observer: AnyObject!
 
 	// MARK: - UI
 
@@ -20,24 +24,25 @@ final class WeatherViewController: UIViewController {
 
 	// Hourly forecast (collection view)
 	private var hourlyCollectionView: UICollectionView!
-	private var hourlyDataSource: UICollectionViewDiffableDataSource<Section, HourCellModel>!
+	private var hourlyDataSource: UICollectionViewDiffableDataSource<Section, HourWeather>!
 
 	// 3‑day forecast (collection view)
 	private var dailyCollectionView: UICollectionView!
-	private var dailyDataSource: UICollectionViewDiffableDataSource<Section, DayCellModel>!
+	private var dailyDataSource: UICollectionViewDiffableDataSource<Section, DayWeather>!
 
 	// MARK: - Data
 
 	private var currentLocation: CLLocation?
-	private var lastFetchedLocation: CLLocation?
 	private var locationTask: Task<Void, Never>?
 
 	// MARK: - View Life Cycle
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
-		view.backgroundColor = .systemBackground
+		view.backgroundColor = .appBackgroud
 		setupUI()
+		NotificationCenter.default.addObserver(self, selector: #selector(updateLoadingUI), name: .weatherFetching, object: nil)
+		NotificationCenter.default.addObserver(self, selector: #selector(updateUI), name: .weatherChanged, object: nil)
 		
 		startLocationUpdates()
 	}
@@ -45,26 +50,12 @@ final class WeatherViewController: UIViewController {
 	// MARK: - UI Setup
 
 	private func setupUI() {
-		// Scroll view + stack
-		let scrollView = UIScrollView()
-		scrollView.preservesSuperviewLayoutMargins = true
-		view.addSubview(scrollView)
-		
-		let contentStack = UIStackView()
-		contentStack.axis = .vertical
-		contentStack.spacing = 16
-		scrollView.addSubview(contentStack)
-		
 		stateView.onRetry = { [weak self] in self?.fetchWeather() }
-		contentStack.addArrangedSubview(stateView)
-		
-		contentStack.addArrangedSubview(currentWeatherView)
 		
 		// Hourly forecast
 		let hourlyHeader = UILabel()
-		hourlyHeader.text = "Почасовой прогноз"
-		hourlyHeader.font = .systemFont(ofSize: 18, weight: .medium)
-		contentStack.addArrangedSubview(hourlyHeader)
+		hourlyHeader.text = NSLocalizedString("Почасовой прогноз", comment: "Hourly forecast header")
+		hourlyHeader.font = .app17Semibold
 		
 		let hourlyLayout = UICollectionViewFlowLayout()
 		hourlyLayout.scrollDirection = .horizontal
@@ -73,13 +64,11 @@ final class WeatherViewController: UIViewController {
 		hourlyCollectionView = UICollectionView(frame: .zero, collectionViewLayout: hourlyLayout)
 		hourlyCollectionView.showsHorizontalScrollIndicator = false
 		hourlyCollectionView.backgroundColor = .clear
-		contentStack.addArrangedSubview(hourlyCollectionView)
 		
 		// 3‑day forecast
 		let dailyHeader = UILabel()
-		dailyHeader.text = "Прогноз на 3 дня"
-		dailyHeader.font = .systemFont(ofSize: 18, weight: .medium)
-		contentStack.addArrangedSubview(dailyHeader)
+		dailyHeader.text = NSLocalizedString("Прогноз на 3 дня", comment: "3-day forecast header")
+		dailyHeader.font = .app17Semibold
 		
 		let dailyLayout = UICollectionViewFlowLayout()
 		dailyLayout.scrollDirection = .horizontal
@@ -88,7 +77,23 @@ final class WeatherViewController: UIViewController {
 		dailyCollectionView = UICollectionView(frame: .zero, collectionViewLayout: dailyLayout)
 		dailyCollectionView.showsHorizontalScrollIndicator = false
 		dailyCollectionView.backgroundColor = .clear
-		contentStack.addArrangedSubview(dailyCollectionView)
+		
+		// Scroll view + stack
+		let scrollView = UIScrollView()
+		scrollView.preservesSuperviewLayoutMargins = true
+		view.addSubview(scrollView)
+		
+		let contentStack = UIStackView(arrangedSubviews: [
+			stateView,
+			currentWeatherView,
+			hourlyHeader,
+			hourlyCollectionView,
+			dailyHeader,
+			dailyCollectionView,
+		])
+		contentStack.axis = .vertical
+		contentStack.spacing = 16
+		scrollView.addSubview(contentStack)
 		
 		// Diffable data sources
 		configureHourlyDataSource()
@@ -99,8 +104,9 @@ final class WeatherViewController: UIViewController {
 		hourlyCollectionView.translatesAutoresizingMaskIntoConstraints = false
 		dailyCollectionView.translatesAutoresizingMaskIntoConstraints = false
 		
-		let bindings: [String : UIView] = ["scrollView" : scrollView,
-										   "contentStack" : contentStack,
+		let bindings: [String : UIView] = [
+			"scrollView" : scrollView,
+			"contentStack" : contentStack,
 		]
 		var constraints = [NSLayoutConstraint]()
 		constraints += [scrollView.topAnchor.constraint(equalTo: view.readableContentGuide.topAnchor)]
@@ -113,8 +119,6 @@ final class WeatherViewController: UIViewController {
 			contentStack.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor, constant: -16),
 			contentStack.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor, constant: 16),
 			contentStack.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor, constant: -32),
-		]
-		constraints += [
 			hourlyCollectionView.heightAnchor.constraint(equalToConstant: 120),
 			dailyCollectionView.heightAnchor.constraint(equalToConstant: 200),
 		]
@@ -141,8 +145,7 @@ final class WeatherViewController: UIViewController {
 					print("stationary: \(update.stationary)")
 					
 					if let location = update.location {
-						
-						guard lastFetchedLocation == nil || lastFetchedLocation!.distance(from: location) > 15_000 else {
+						if case let .success(weather) = model.weather, weather.location.distance(from: location) < 15_000 {
 							continue
 						}
 						
@@ -180,64 +183,44 @@ final class WeatherViewController: UIViewController {
 	// MARK: Networking
 
 	private func fetchWeather() {
-		guard let coord = currentLocation?.coordinate, stateView.isLoading == false else { return }
+		guard let currentLocation else { return }
 		
-		stateView.isLoading = true
-		
-		Task {
-			do {
-				let current = try await WebService.shared.fetchCurrentWeather(
-					latitude: coord.latitude,
-					longitude: coord.longitude)
-
-				let forecast = try await WebService.shared.fetchForecast(
-					latitude: coord.latitude,
-					longitude: coord.longitude)
-
-				await MainActor.run {
-					lastFetchedLocation = currentLocation
-					stateView.isLoading = false
-					updateUI(current: current, forecast: forecast)
-				}
-			} catch {
-				await MainActor.run {
-					stateView.errorMessage = error.localizedDescription
-				}
-			}
-		}
+		model.fetchWeather(for: currentLocation)
 	}
 
 	// MARK: - UI Update
+	
+	@objc
+	private func updateLoadingUI() {
+		stateView.isLoading = model.isLoading
+	}
 
-	private var hourlyModels: [HourCellModel] = []
-	private var dailyModels: [DayCellModel] = []
-
-	private func updateUI(current: DTOCurrentWeatherResponse, forecast: DTOForecastResponse) {
-		// Current
-		currentWeatherView.configure(with: current)
-
-		// Hourly
-		hourlyModels = []
-		let today = forecast.forecast.forecastday.first!
-		let nowHourIndex = Calendar.current.component(.hour, from: Date())
-		// Оставшиеся часы текущего дня
-		hourlyModels.append(contentsOf: today.hour.dropFirst(nowHourIndex).map(HourCellModel.init))
-		
-		// Все часы следующего дня
-		if forecast.forecast.forecastday.count > 1 {
-			hourlyModels.append(contentsOf: forecast.forecast.forecastday[1].hour.map(HourCellModel.init))
+	@objc
+	private func updateUI() {
+		switch model.weather {
+		case let .success(weather):
+			// Current
+			let image = model.loadImage(from: weather.current.iconURL) { [weak self] currentImage in
+				if case let .success(currentWeather) = self?.model.weather {
+					self?.currentWeatherView.configure(with: currentWeather.current, image: currentImage)
+				}
+			}
+			currentWeatherView.configure(with: weather.current, image: image)
+			// Hourly
+			var snapshot = NSDiffableDataSourceSnapshot<Section, HourWeather>()
+			snapshot.appendSections([Section.main])
+			snapshot.appendItems(weather.hourly)
+			hourlyDataSource.apply(snapshot, animatingDifferences: true)
+			// 3‑day forecast
+			var daySnapshot = NSDiffableDataSourceSnapshot<Section, DayWeather>()
+			daySnapshot.appendSections([Section.main])
+			daySnapshot.appendItems(weather.forecast)
+			dailyDataSource.apply(daySnapshot, animatingDifferences: true)
+		case let .failure(error):
+			stateView.errorMessage = error.localizedDescription
+		case .none:
+			break
 		}
-		var snapshot = NSDiffableDataSourceSnapshot<Section, HourCellModel>()
-		snapshot.appendSections([Section.main])
-		snapshot.appendItems(hourlyModels)
-		hourlyDataSource.apply(snapshot, animatingDifferences: true)
-
-		// 3‑дневный прогноз
-		dailyModels = forecast.forecast.forecastday.map(DayCellModel.init)
-		var daySnapshot = NSDiffableDataSourceSnapshot<Section, DayCellModel>()
-		daySnapshot.appendSections([Section.main])
-		daySnapshot.appendItems(dailyModels)
-		dailyDataSource.apply(daySnapshot, animatingDifferences: true)
 	}
 }
 
@@ -248,41 +231,41 @@ extension WeatherViewController {
 	private enum Section { case main }
 
 	private func configureHourlyDataSource() {
-		let cellRegistration = UICollectionView.CellRegistration<HourCell, HourCellModel> { [weak self] cell, indexPath, model in
+		let cellRegistration = UICollectionView.CellRegistration<HourCell, HourWeather> { [weak self] cell, indexPath, model in
 			guard let self else { return }
 			
-			let image = DownloadService.shared.loadImage(from: model.iconURL) {_ in
+			let image = self.model.loadImage(from: model.iconURL) {_ in
 				self.setHourlyNeedsUpdate(model)
 			}
 			
 			cell.configure(with: model, image: image)
 		}
-		hourlyDataSource = UICollectionViewDiffableDataSource<Section, HourCellModel>(collectionView: hourlyCollectionView) { (collectionView, indexPath, model) in
+		hourlyDataSource = UICollectionViewDiffableDataSource<Section, HourWeather>(collectionView: hourlyCollectionView) { (collectionView, indexPath, model) in
 			collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: model)
 		}
 	}
 
 	private func configureDailyDataSource() {
-		let cellRegistration = UICollectionView.CellRegistration<DayCell, DayCellModel> { [weak self] cell, indexPath, model in
+		let cellRegistration = UICollectionView.CellRegistration<DayCell, DayWeather> { [weak self] cell, indexPath, model in
 			guard let self else { return }
 			
-			let image = DownloadService.shared.loadImage(from: model.iconURL) {_ in
+			let image = self.model.loadImage(from: model.iconURL) {_ in
 				self.setDailyNeedsUpdate(model)
 			}
 			cell.configure(with: model, image: image)
 		}
-		dailyDataSource = UICollectionViewDiffableDataSource<Section, DayCellModel>(collectionView: dailyCollectionView) { (collectionView, indexPath, model) in
+		dailyDataSource = UICollectionViewDiffableDataSource<Section, DayWeather>(collectionView: dailyCollectionView) { (collectionView, indexPath, model) in
 			collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: model)
 		}
 	}
 	
-	private func setHourlyNeedsUpdate(_ id: HourCellModel) {
+	private func setHourlyNeedsUpdate(_ id: HourWeather) {
 		var snapshot = hourlyDataSource.snapshot()
 		snapshot.reconfigureItems([id])
 		hourlyDataSource.apply(snapshot, animatingDifferences: true)
 	}
 	
-	private func setDailyNeedsUpdate(_ id: DayCellModel) {
+	private func setDailyNeedsUpdate(_ id: DayWeather) {
 		var snapshot = dailyDataSource.snapshot()
 		snapshot.reconfigureItems([id])
 		dailyDataSource.apply(snapshot, animatingDifferences: true)

@@ -6,21 +6,7 @@
 //
 
 import UIKit
-
-nonisolated
-struct DayCellModel: Hashable {
-	let date: String
-	let minTempC: Double
-	let maxTempC: Double
-	let iconURL: URL
-
-	init(day: DTOForecastResponse.ForecastDay) {
-		self.date = day.date
-		self.minTempC = day.day.mintemp_c
-		self.maxTempC = day.day.maxtemp_c
-		self.iconURL = URL(string: "https:"+day.day.condition.icon) ?? URL(fileURLWithPath: "")
-	}
-}
+import Model
 
 class DayCell: UICollectionViewCell {
 	static let id = "DayCell"
@@ -34,13 +20,13 @@ class DayCell: UICollectionViewCell {
 		contentView.backgroundColor = UIColor.systemGray6
 		contentView.layer.cornerRadius = 8
 
-		dateLabel.font = .systemFont(ofSize: 14, weight: .medium)
+		dateLabel.font = .app14Medium
 		dateLabel.textAlignment = .center
 
 		iconView.contentMode = .scaleAspectFit
 		iconView.tintColor = .label
 
-		tempRangeLabel.font = .systemFont(ofSize: 12)
+		tempRangeLabel.font = .app12
 		tempRangeLabel.textAlignment = .center
 
 		let stack = UIStackView(arrangedSubviews: [dateLabel, iconView, tempRangeLabel])
@@ -64,9 +50,9 @@ class DayCell: UICollectionViewCell {
 
 	required init?(coder: NSCoder) { fatalError() }
 
-	func configure(with model: DayCellModel, image: UIImage) {
+	func configure(with model: DayWeather, image: UIImage) {
 		dateLabel.text = model.date
-		tempRangeLabel.text = "\(Measurement(value: Double(model.minTempC), unit: UnitTemperature.celsius).formatted()) / \(Measurement(value: Double(model.maxTempC), unit: UnitTemperature.celsius).formatted())"
+		tempRangeLabel.text = "\(model.minTemp.formatted()) / \(model.maxTemp.formatted())"
 		iconView.image = image
 	}
 }

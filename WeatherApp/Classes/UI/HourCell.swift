@@ -6,19 +6,7 @@
 //
 
 import UIKit
-
-nonisolated
-struct HourCellModel: Hashable {
-	let time: String
-	let tempC: Double
-	let iconURL: URL
-
-	init(hour: DTOForecastResponse.ForecastDay.Hour) {
-		self.time = hour.time.split(separator: " ").last.map(String.init) ?? ""
-		self.tempC = hour.temp_c
-		self.iconURL = URL(string: "https:"+hour.condition.icon) ?? URL(fileURLWithPath: "")
-	}
-}
+import Model
 
 class HourCell: UICollectionViewCell {
 	static let id = "HourCell"
@@ -32,13 +20,13 @@ class HourCell: UICollectionViewCell {
 		contentView.backgroundColor = UIColor.systemGray6
 		contentView.layer.cornerRadius = 8
 
-		timeLabel.font = .systemFont(ofSize: 12)
+		timeLabel.font = .app12
 		timeLabel.textAlignment = .center
 
 		iconView.contentMode = .scaleAspectFit
 		iconView.tintColor = .label
 
-		tempLabel.font = .systemFont(ofSize: 14, weight: .medium)
+		tempLabel.font = .app14Medium
 		tempLabel.textAlignment = .center
 
 		let stack = UIStackView(arrangedSubviews: [timeLabel, iconView, tempLabel])
@@ -62,9 +50,9 @@ class HourCell: UICollectionViewCell {
 
 	required init?(coder: NSCoder) { fatalError() }
 
-	func configure(with model: HourCellModel, image: UIImage) {
+	func configure(with model: HourWeather, image: UIImage) {
 		timeLabel.text = model.time
-		tempLabel.text = Measurement(value: Double(model.tempC), unit: UnitTemperature.celsius).formatted()
+		tempLabel.text = model.temp.formatted()
 		iconView.image = image
 	}
 }

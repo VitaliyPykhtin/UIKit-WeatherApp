@@ -1,14 +1,16 @@
 //
-//  DownloadService.swift
+//  InMemoryDownloadService.swift
 //  WeatherApp
 //
 //  Created by Vitaliy Pykhtin on 13.03.2026.
 //
 
 import UIKit
+import Model
 
 @MainActor
-class DownloadService {
+class InMemoryDownloadService: DownloadService {
+	
 	// MARK: – Private
 	
 	private let cache = NSCache<NSString, UIImage>()
@@ -16,10 +18,6 @@ class DownloadService {
 	
 	private let placeholder = UIImage(systemName: "photo") ?? UIImage()
 	private let thumbnailSize = CGSize(width: 64, height: 64)
-	
-	// MARK: – Public API
-	
-	static let shared = DownloadService()
 	
 	/// Загружает изображение.
 	/// Возвращается placeholder сразу, а после загрузки – вызывается `update` для всех

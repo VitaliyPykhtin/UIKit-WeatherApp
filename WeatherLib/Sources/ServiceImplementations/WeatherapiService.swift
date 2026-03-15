@@ -1,17 +1,15 @@
 //
-//  WebService.swift
+//  WeatherapiService.swift
 //  WeatherApp
 //
 //  Created by Vitaliy Pykhtin on 12.03.2026.
 //
 
 import Foundation
+import Model
+import Toolbox
 
-actor WebService {
-
-	// MARK: - Singleton
-
-	static let shared = WebService()
+actor WeatherapiService: NetworkService {
 
 	// MARK: - Methods
 
@@ -21,7 +19,7 @@ actor WebService {
 
 		guard let httpResp = response as? HTTPURLResponse,
 			  200..<300 ~= httpResp.statusCode else {
-			throw WebServiceError.invalidResponse
+			throw NetworkServiceError.invalidResponse
 		}
 
 		do {
@@ -29,7 +27,7 @@ actor WebService {
 			// оставляем стандартный decoder.
 			return try JSONDecoder().decode(T.self, from: data)
 		} catch {
-			throw WebServiceError.decodingFailed(error)
+			throw NetworkServiceError.decodingFailed(error)
 		}
 	}
 
@@ -41,7 +39,7 @@ actor WebService {
 	///   - latitude: широта
 	///   - longitude: долгота
 	/// - Returns: `CurrentWeatherResponse` – модель, описанная в API‑документации
-	/// - Throws: `WebServiceError` – если запрос не удался или JSON‑парсинг не прошёл
+	/// - Throws: `NetworkServiceError` – если запрос не удался или JSON‑парсинг не прошёл
 	func fetchCurrentWeather(latitude: Double,
 							 longitude: Double) async throws -> DTOCurrentWeatherResponse {
 		try await performRequest(url: .apiCurrent(latitude: latitude, longitude: longitude))
@@ -54,7 +52,7 @@ actor WebService {
 	///   - longitude: долгота
 	///   - days: количество дней (от 1 до 10)
 	/// - Returns: `ForecastResponse` – модель, описанная в API‑документации
-	/// - Throws: `WebServiceError`
+	/// - Throws: `NetworkServiceError`
 	func fetchForecast(latitude: Double,
 					   longitude: Double,
 					   days: Int = 3) async throws -> DTOForecastResponse {

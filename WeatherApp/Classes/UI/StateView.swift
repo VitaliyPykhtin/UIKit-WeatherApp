@@ -57,10 +57,11 @@ final class StateView: UIView {
 
 	// MARK: Setup
 	private func setup() {
+		errorLabel.font = .app12
 		errorLabel.numberOfLines = 0
 		errorLabel.textAlignment = .center
 		errorLabel.isHidden = true
-		retryButton.setTitle("Повторить", for: .normal)
+		retryButton.setTitle(NSLocalizedString("Повторить", comment: "Retry button"), for: .normal)
 		retryButton.isHidden = true
 		retryButton.addTarget(self, action: #selector(retryTapped), for: .touchUpInside)
 		

@@ -7,7 +7,7 @@
 
 import Foundation
 
-private extension URL {
+fileprivate extension URL {
 	enum API {
 		static let base = URL(string: "https://api.weatherapi.com/")!
 		static let apiKey = "fa8b3df74d4042b9aa7135114252304"
