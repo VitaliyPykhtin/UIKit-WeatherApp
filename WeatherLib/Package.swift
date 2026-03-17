@@ -1,29 +1,26 @@
 // swift-tools-version: 6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
-// TODO: lower version to 5.9 (package visibility)
 import PackageDescription
 
 let package = Package(
-    name: "WeatherLib",
+	name: "WeatherLib",
 	platforms: [.iOS(.v15)],
-    products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
-        .library(
-            name: "WeatherLib",
+	products: [
+		.library(
+			name: "WeatherLib",
 			targets: ["Model", "ServiceImplementations"],
-        ),
+		),
 		.library(
 			name: "MockServiceImplementations",
 			targets: ["MockServiceImplementations"],
-		)
-    ],
-    targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
+		),
+	],
+	targets: [
 		.target(
 			name: "Model",
 			dependencies: ["Toolbox"],
+			swiftSettings: [.defaultIsolation(MainActor.self)]
 		),
 		.target(
 			name: "ServiceImplementations",
@@ -36,9 +33,19 @@ let package = Package(
 			name: "MockServiceImplementations",
 			dependencies: ["Model", "Toolbox"],
 		),
-        .testTarget(
-            name: "WeatherLibTests",
-            dependencies: ["MockServiceImplementations", "Model"],
-        ),
-    ]
+		.testTarget(
+			name: "WeatherLibTests",
+			dependencies: ["MockServiceImplementations", "Model"],
+		),
+	],
 )
+
+for target in package.targets {
+	var settings = target.swiftSettings ?? []
+	settings += [
+		// 6.2 Approachable concurrency
+		.enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+		.enableUpcomingFeature("InferIsolatedConformances"),
+	]
+	target.swiftSettings = settings
+}

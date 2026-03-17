@@ -15,6 +15,8 @@ class HourCell: UICollectionViewCell {
 	private let iconView = UIImageView()
 	private let tempLabel = UILabel()
 
+	private let timeStyle = Date.FormatStyle().hour().minute()
+
 	override init(frame: CGRect) {
 		super.init(frame: frame)
 		contentView.backgroundColor = UIColor.systemGray6
@@ -51,7 +53,7 @@ class HourCell: UICollectionViewCell {
 	required init?(coder: NSCoder) { fatalError() }
 
 	func configure(with model: HourWeather, image: UIImage) {
-		timeLabel.text = model.time
+		timeLabel.text = model.time.formatted(timeStyle)
 		tempLabel.text = model.temp.formatted()
 		iconView.image = image
 	}

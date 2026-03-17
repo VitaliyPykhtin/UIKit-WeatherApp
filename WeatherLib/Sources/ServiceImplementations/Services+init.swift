@@ -7,8 +7,9 @@
 
 import Model
 
-public extension Services {
-	init() {
+@MainActor
+extension Services {
+	public init() {
 		self.init(networkService: WeatherapiService(), downloadService: InMemoryDownloadService())
 	}
 }

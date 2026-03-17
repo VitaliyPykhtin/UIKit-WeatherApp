@@ -41,6 +41,7 @@ final class StateView: UIView {
 		}
 		set {
 			errorLabel.text = newValue
+			errorLabel.isHidden = newValue?.isEmpty ?? true
 			retryButton.isHidden = newValue?.isEmpty ?? true
 		}
 	}

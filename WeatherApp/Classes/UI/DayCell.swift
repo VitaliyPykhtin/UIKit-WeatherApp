@@ -51,7 +51,7 @@ class DayCell: UICollectionViewCell {
 	required init?(coder: NSCoder) { fatalError() }
 
 	func configure(with model: DayWeather, image: UIImage) {
-		dateLabel.text = model.date
+		dateLabel.text = model.date.formatted(date: .numeric, time: .omitted)
 		tempRangeLabel.text = "\(model.minTemp.formatted()) / \(model.maxTemp.formatted())"
 		iconView.image = image
 	}
