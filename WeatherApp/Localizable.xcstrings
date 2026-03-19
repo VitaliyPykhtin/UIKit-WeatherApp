@@ -1,0 +1,39 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "3-day forecast" : {
+      "comment" : "3-day forecast header",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прогноз на 3 дня"
+          }
+        }
+      }
+    },
+    "Hourly forecast" : {
+      "comment" : "Hourly forecast header",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Почасовой прогноз"
+          }
+        }
+      }
+    },
+    "Retry" : {
+      "comment" : "Retry button",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повторить"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.1"
+}

@@ -15,7 +15,7 @@ package protocol DownloadService: Sendable {
 	func loadImage(from url: URL, update: @escaping (UIImage) -> Void) -> UIImage
 }
 
-package protocol NetworkService: Sendable {
+nonisolated package protocol NetworkService: Sendable {
 	/// Получить текущую погоду по координатам.
 	///
 	/// - Parameters:

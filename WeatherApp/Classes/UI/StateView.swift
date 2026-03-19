@@ -7,18 +7,17 @@
 
 import UIKit
 
-
 /// StateView (loading / error / retry)
 final class StateView: UIView {
-	
+
 	// MARK: - Subviews
-	
+
 	private let activityIndicator = UIActivityIndicatorView(style: .large)
 	private let errorLabel = UILabel()
 	private let retryButton = UIButton(type: .system)
 
 	// MARK: - Public API
-	
+
 	var isLoading: Bool {
 		get {
 			activityIndicator.isAnimating
@@ -62,15 +61,15 @@ final class StateView: UIView {
 		errorLabel.numberOfLines = 0
 		errorLabel.textAlignment = .center
 		errorLabel.isHidden = true
-		retryButton.setTitle(NSLocalizedString("Повторить", comment: "Retry button"), for: .normal)
+		retryButton.setTitle(NSLocalizedString("Retry", comment: "Retry button"), for: .normal)
 		retryButton.isHidden = true
 		retryButton.addTarget(self, action: #selector(retryTapped), for: .touchUpInside)
-		
+
 		let stack = UIStackView(arrangedSubviews: [activityIndicator, errorLabel, retryButton])
 		stack.axis = .vertical
 		stack.alignment = .center
 		addSubview(stack)
-		
+
 		stack.translatesAutoresizingMaskIntoConstraints = false
 
 		let bindings: [String : UIView] = ["stack" : stack]
@@ -85,3 +84,4 @@ final class StateView: UIView {
 		onRetry?()
 	}
 }
+

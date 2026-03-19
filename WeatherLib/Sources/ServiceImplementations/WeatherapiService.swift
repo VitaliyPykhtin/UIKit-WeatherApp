@@ -9,7 +9,7 @@ import Foundation
 import Model
 import Toolbox
 
-actor WeatherapiService: NetworkService {
+struct WeatherapiService: NetworkService {
 
 	private let serviceDateDecodingStrategy = JSONDecoder.DateDecodingStrategy.custom { decoder in
 		let container = try decoder.singleValueContainer()
@@ -51,24 +51,24 @@ actor WeatherapiService: NetworkService {
 
 	// MARK: - Public
 
-	/// Получить текущую погоду по координатам.
+	/// Get current weather by coordinates.
 	///
 	/// - Parameters:
-	///   - latitude: широта
-	///   - longitude: долгота
-	/// - Returns: `CurrentWeatherResponse` – модель, описанная в API‑документации
-	/// - Throws: `NetworkServiceError` – если запрос не удался или JSON‑парсинг не прошёл
+	///   - latitude: latitude
+	///   - longitude: longitude
+	/// - Returns: `CurrentWeatherResponse` – model described in API documentation
+	/// - Throws: `NetworkServiceError` – if request failed or JSON parsing failed
 	func fetchCurrentWeather(latitude: Double, longitude: Double) async throws -> DTOCurrentWeatherResponse {
 		try await performRequest(url: .apiCurrent(latitude: latitude, longitude: longitude))
 	}
 
-	/// Получить прогноз на несколько дней (по умолчанию 3 дня) по координатам.
+	/// Get forecast for several days (default 3 days) by coordinates.
 	///
 	/// - Parameters:
-	///   - latitude: широта
-	///   - longitude: долгота
-	///   - days: количество дней (от 1 до 10)
-	/// - Returns: `ForecastResponse` – модель, описанная в API‑документации
+	///   - latitude: latitude
+	///   - longitude: longitude
+	///   - days: number of days (from 1 to 3)
+	/// - Returns: `ForecastResponse` – model described in API documentation
 	/// - Throws: `NetworkServiceError`
 	func fetchForecast(latitude: Double, longitude: Double, days: Int = 3) async throws -> DTOForecastResponse {
 		try await performRequest(url: .apiForecast(latitude: latitude, longitude: longitude, days: days))

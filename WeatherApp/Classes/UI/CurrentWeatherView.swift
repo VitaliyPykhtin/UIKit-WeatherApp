@@ -17,7 +17,7 @@ final class CurrentWeatherView: UIView {
     private let windHumidityLabel  = UILabel()
 
     // MARK: Init
-	
+
 	override init(frame: CGRect) {
 		super.init(frame: frame)
 		setup()
@@ -28,7 +28,7 @@ final class CurrentWeatherView: UIView {
     // MARK: Setup
     private func setup() {
 		isHidden = true
-		
+
         locationLabel.font = .app20Semibold
 		tempLabel.font     = .app64Thin
         conditionImageView.contentMode = .scaleAspectFit
@@ -45,7 +45,7 @@ final class CurrentWeatherView: UIView {
         stack.alignment = .center
 
         addSubview(stack)
-		
+
 		stack.translatesAutoresizingMaskIntoConstraints = false
 
 		let bindings: [String : UIView] = ["stack" : stack]
@@ -55,13 +55,14 @@ final class CurrentWeatherView: UIView {
 													  metrics: nil, views: bindings)
 		NSLayoutConstraint.activate(constraints)
     }
-	
+
 	func configure(with model: CurrentWeather, image: UIImage) {
 		isHidden = false
-		
+
 		locationLabel.text = model.location
 		tempLabel.text = model.temperature.formatted()
-		windHumidityLabel.text = "Ветер \(model.windSpeed.formatted()) | Влажность \(model.humidity)%"
+		windHumidityLabel.text = "Wind \(model.windSpeed.formatted()) | Humidity \(model.humidity)%"
 		conditionImageView.image = image
 	}
 }
+
