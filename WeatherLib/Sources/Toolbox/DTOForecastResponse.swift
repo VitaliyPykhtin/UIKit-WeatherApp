@@ -5,7 +5,7 @@
 //  Created by Vitaliy Pykhtin on 13.03.2026.
 //
 
-import Foundation
+package import Foundation
 
 package struct DTOForecastResponse: Decodable {
 	package let forecast: Forecast

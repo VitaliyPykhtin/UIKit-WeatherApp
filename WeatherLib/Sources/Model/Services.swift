@@ -5,8 +5,8 @@
 //  Created by Vitaliy Pykhtin on 14.03.2026.
 //
 
-import Toolbox
-import UIKit
+package import Toolbox
+package import UIKit
 
 package protocol DownloadService: Sendable {
 	/// Загружает изображение.
@@ -37,10 +37,10 @@ nonisolated package protocol NetworkService: Sendable {
 }
 
 nonisolated public struct Services {
-	let networkService: NetworkService
-	let downloadService: DownloadService
+	let networkService: any NetworkService
+	let downloadService: any DownloadService
 
-	package init(networkService: NetworkService, downloadService: DownloadService) {
+	package init(networkService: some NetworkService, downloadService: some DownloadService) {
 		self.networkService = networkService
 		self.downloadService = downloadService
 	}

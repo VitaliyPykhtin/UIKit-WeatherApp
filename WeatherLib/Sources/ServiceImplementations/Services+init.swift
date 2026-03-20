@@ -5,7 +5,7 @@
 //  Created by Vitaliy Pykhtin on 14.03.2026.
 //
 
-import Model
+public import Model
 
 @MainActor
 extension Services {

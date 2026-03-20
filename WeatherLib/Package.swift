@@ -39,13 +39,22 @@ let package = Package(
 		),
 	],
 )
-
+// https://www.swift.org/swift-evolution/#?upcoming=true
 for target in package.targets {
 	var settings = target.swiftSettings ?? []
 	settings += [
-		// 6.2 Approachable concurrency
+		// xcrun swiftc -print-supported-features
+		// 5.8 till 7
+		.enableUpcomingFeature("ExistentialAny"),
+		// 6.0 till 7
+		.enableUpcomingFeature("InternalImportsByDefault"),
+		// 6.1 till 7
+		.enableUpcomingFeature("MemberImportVisibility"),
+		// 6.2 Approachable concurrency till 7
 		.enableUpcomingFeature("NonisolatedNonsendingByDefault"),
 		.enableUpcomingFeature("InferIsolatedConformances"),
+		// 6.3 till 7
+		.enableUpcomingFeature("ImmutableWeakCaptures"),
 	]
 	target.swiftSettings = settings
 }

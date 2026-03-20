@@ -1,9 +1,9 @@
 // The Swift Programming Language
 // https://docs.swift.org/swift-book
 
-import CoreLocation
-import Toolbox
-import UIKit
+public import CoreLocation
+package import Toolbox
+public import UIKit
 
 nonisolated public struct DayWeather: Hashable, Sendable {
 	public let date: Date
@@ -90,7 +90,7 @@ public class Model {
 			NotificationCenter.default.post(Notification(name: .weatherFetching))
 		}
 	}
-	public private(set) var weather: Result<Weather, Error>? {
+	public private(set) var weather: Result<Weather, any Error>? {
 		didSet {
 			isLoading = false
 			NotificationCenter.default.post(Notification(name: .weatherChanged))

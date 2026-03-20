@@ -5,12 +5,12 @@
 //  Created by Vitaliy Pykhtin on 12.03.2026.
 //
 
-import Foundation
+public  import Foundation
 
 public enum NetworkServiceError: LocalizedError {
 	case invalidURL
 	case invalidResponse
-	case decodingFailed(Error)
+	case decodingFailed(any Error)
 	
 	public var errorDescription: String? {
 		switch self {
