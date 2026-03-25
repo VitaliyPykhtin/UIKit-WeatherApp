@@ -45,7 +45,15 @@ final class StateView: UIView {
 		}
 	}
 
-	var onRetry: (() -> Void)?
+	var onRetry: UIAction? {
+		didSet {
+			if let onRetry {
+				retryButton.addAction(onRetry, for: .primaryActionTriggered)
+			} else if let oldValue {
+				retryButton.removeAction(oldValue, for: .primaryActionTriggered)
+			}
+		}
+	}
 
 	// MARK: Init
 	override init(frame: CGRect) {
@@ -63,7 +71,6 @@ final class StateView: UIView {
 		errorLabel.isHidden = true
 		retryButton.setTitle(NSLocalizedString("Retry", comment: "Retry button"), for: .normal)
 		retryButton.isHidden = true
-		retryButton.addTarget(self, action: #selector(retryTapped), for: .touchUpInside)
 
 		let stack = UIStackView(arrangedSubviews: [activityIndicator, errorLabel, retryButton])
 		stack.axis = .vertical
@@ -78,10 +85,6 @@ final class StateView: UIView {
 		constraints += NSLayoutConstraint.constraints(withVisualFormat: "H:|[stack]|",
 													  metrics: nil, views: bindings)
 		NSLayoutConstraint.activate(constraints)
-	}
-
-	@objc private func retryTapped() {
-		onRetry?()
 	}
 }
 

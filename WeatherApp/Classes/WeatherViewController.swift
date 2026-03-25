@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import CoreLocation
 import Model
 import ServiceImplementations
 
@@ -30,11 +29,6 @@ final class WeatherViewController: UIViewController {
 	private var dailyCollectionView: UICollectionView!
 	private var dailyDataSource: UICollectionViewDiffableDataSource<Section, DayWeather>!
 
-	// MARK: - Data
-
-	private var currentLocation: CLLocation?
-	private var locationTask: Task<Void, Never>?
-
 	// MARK: - View Life Cycle
 
 	override func viewDidLoad() {
@@ -44,13 +38,14 @@ final class WeatherViewController: UIViewController {
 		NotificationCenter.default.addObserver(self, selector: #selector(updateLoadingUI), name: .weatherFetching, object: nil)
 		NotificationCenter.default.addObserver(self, selector: #selector(updateUI), name: .weatherChanged, object: nil)
 
-		startLocationUpdates()
+		model.startLocationUpdates()
 	}
 
 	// MARK: - UI Setup
 
 	private func setupUI() {
-		stateView.onRetry = { [weak self] in self?.fetchWeather() }
+		let model = model
+		stateView.onRetry = UIAction { _ in model.fetchWeather() }
 
 		// Hourly forecast
 		let hourlyHeader = UILabel()
@@ -123,69 +118,6 @@ final class WeatherViewController: UIViewController {
 			dailyCollectionView.heightAnchor.constraint(equalToConstant: 200),
 		]
 		NSLayoutConstraint.activate(constraints)
-	}
-
-	// MARK: - Location
-
-	private func startLocationUpdates() {
-		locationTask?.cancel()
-
-		locationTask = Task {
-			do {
-				for try await update in CLLocationUpdate.liveUpdates() {
-					print("Location updates: \(String(describing: update.location))")
-					print("authorizationRequestInProgress: \(update.authorizationRequestInProgress)")
-					print("accuracyLimited: \(update.accuracyLimited)")
-					print("authorizationDenied: \(update.authorizationDenied)")
-					print("authorizationDeniedGlobally: \(update.authorizationDeniedGlobally)")
-					print("authorizationRestricted: \(update.authorizationRestricted)")
-					print("insufficientlyInUse: \(update.insufficientlyInUse)")
-					print("locationUnavailable: \(update.locationUnavailable)")
-					print("serviceSessionRequired: \(update.serviceSessionRequired)")
-					print("stationary: \(update.stationary)")
-
-					if let location = update.location {
-						if case let .success(weather) = model.weather, weather.location.distance(from: location) < 15_000 {
-							continue
-						}
-
-						currentLocation = location
-						fetchWeather()
-					} else if
-						update.authorizationRequestInProgress == false &&
-							update.authorizationDenied == true ||
-							update.authorizationDeniedGlobally == true ||
-							update.authorizationRestricted == true ||
-							update.locationUnavailable == true ||
-							update.serviceSessionRequired == true {
-						useDefaultLocation()
-					}
-				}
-			} catch {
-				print("CLLocationUpdate error: $error)")
-				useDefaultLocation()
-			}
-		}
-	}
-
-	private func useDefaultLocation() {
-		if currentLocation == nil {
-			// Moscow
-			currentLocation = CLLocation(latitude: 55.7558, longitude: 37.6173)
-		}
-		fetchWeather()
-	}
-
-	deinit {
-		locationTask?.cancel()
-	}
-
-	// MARK: Networking
-
-	private func fetchWeather() {
-		guard let currentLocation else { return }
-
-		model.fetchWeather(for: currentLocation)
 	}
 
 	// MARK: - UI Update

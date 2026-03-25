@@ -84,6 +84,7 @@ extension Notification.Name {
 // TODO: Migrate to @Observable
 public class Model {
 	private let services: Services
+	private var locationTask: Task<Void, Never>?
 
 	public private(set) var isLoading: Bool = false {
 		didSet {
@@ -101,7 +102,52 @@ public class Model {
 		self.services = services
 	}
 
-	public func fetchWeather(for location: CLLocation) {
+	deinit {
+		locationTask?.cancel()
+	}
+
+	public func startLocationUpdates() {
+		locationTask?.cancel()
+
+		locationTask = Task {
+			do {
+				// Implicit service sessions since iOS 18
+				for try await update in CLLocationUpdate.liveUpdates() {
+					print("Location updates: \(String(describing: update.location))")
+					print("authorizationRequestInProgress: \(update.authorizationRequestInProgress)")
+					print("accuracyLimited: \(update.accuracyLimited)")
+					print("authorizationDenied: \(update.authorizationDenied)")
+					print("authorizationDeniedGlobally: \(update.authorizationDeniedGlobally)")
+					print("authorizationRestricted: \(update.authorizationRestricted)")
+					print("insufficientlyInUse: \(update.insufficientlyInUse)")
+					print("locationUnavailable: \(update.locationUnavailable)")
+					print("serviceSessionRequired: \(update.serviceSessionRequired)")
+					print("stationary: \(update.stationary)")
+
+					if let location = update.location {
+						if case let .success(weather) = weather, weather.location.distance(from: location) < 15_000 {
+							continue
+						}
+
+						fetchWeather(for: location)
+					} else if
+						update.authorizationRequestInProgress == false &&
+							update.authorizationDenied == true ||
+							update.authorizationDeniedGlobally == true ||
+							update.authorizationRestricted == true ||
+							update.locationUnavailable == true ||
+							update.serviceSessionRequired == true {
+						fetchWeather()
+					}
+				}
+			} catch {
+				print("CLLocationUpdate error: $error)")
+				fetchWeather()
+			}
+		}
+	}
+
+	public func fetchWeather(for location: CLLocation = CLLocation(latitude: 55.7558, longitude: 37.6173)) {
 		guard isLoading == false else { return }
 
 		isLoading = true
