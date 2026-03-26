@@ -61,7 +61,7 @@ final class CurrentWeatherView: UIView {
 
 		locationLabel.text = model.location
 		tempLabel.text = model.temperature.formatted()
-		windHumidityLabel.text = "Wind \(model.windSpeed.formatted()) | Humidity \(model.humidity)%"
+		windHumidityLabel.text = String(localized: "Wind \(model.windSpeed.formatted()) | Humidity \(model.humidity)%")
 		conditionImageView.image = image
 	}
 }

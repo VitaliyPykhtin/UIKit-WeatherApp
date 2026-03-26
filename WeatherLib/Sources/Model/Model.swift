@@ -76,25 +76,17 @@ extension Weather {
 	}
 }
 
-extension Notification.Name {
-	public static let weatherFetching = Notification.Name("Model.weatherFetching")
-	public static let weatherChanged = Notification.Name("Model.weatherChanged")
-}
-
-// TODO: Migrate to @Observable
+@Observable
 public class Model {
+	@ObservationIgnored
 	private let services: Services
+	@ObservationIgnored
 	private var locationTask: Task<Void, Never>?
 
-	public private(set) var isLoading: Bool = false {
-		didSet {
-			NotificationCenter.default.post(Notification(name: .weatherFetching))
-		}
-	}
+	public private(set) var isLoading: Bool = false
 	public private(set) var weather: Result<Weather, any Error>? {
 		didSet {
 			isLoading = false
-			NotificationCenter.default.post(Notification(name: .weatherChanged))
 		}
 	}
 

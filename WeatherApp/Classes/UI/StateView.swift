@@ -14,7 +14,15 @@ final class StateView: UIView {
 
 	private let activityIndicator = UIActivityIndicatorView(style: .large)
 	private let errorLabel = UILabel()
-	private let retryButton = UIButton(type: .system)
+	private let retryButton = UIButton(configuration: {
+		var config = if #available(iOS 26.0, *) {
+			UIButton.Configuration.prominentGlass()
+		} else {
+			UIButton.Configuration.borderedProminent()
+		}
+		config.title = String(localized: "Retry")
+		return config
+	}())
 
 	// MARK: - Public API
 
@@ -69,7 +77,6 @@ final class StateView: UIView {
 		errorLabel.numberOfLines = 0
 		errorLabel.textAlignment = .center
 		errorLabel.isHidden = true
-		retryButton.setTitle(NSLocalizedString("Retry", comment: "Retry button"), for: .normal)
 		retryButton.isHidden = true
 
 		let stack = UIStackView(arrangedSubviews: [activityIndicator, errorLabel, retryButton])

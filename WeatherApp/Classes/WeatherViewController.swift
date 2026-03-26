@@ -35,8 +35,6 @@ final class WeatherViewController: UIViewController {
 		super.viewDidLoad()
 		view.backgroundColor = .appBackgroud
 		setupUI()
-		NotificationCenter.default.addObserver(self, selector: #selector(updateLoadingUI), name: .weatherFetching, object: nil)
-		NotificationCenter.default.addObserver(self, selector: #selector(updateUI), name: .weatherChanged, object: nil)
 
 		model.startLocationUpdates()
 	}
@@ -49,7 +47,7 @@ final class WeatherViewController: UIViewController {
 
 		// Hourly forecast
 		let hourlyHeader = UILabel()
-		hourlyHeader.text = NSLocalizedString("Hourly forecast", comment: "Hourly forecast header")
+		hourlyHeader.text = String(localized: "Hourly forecast")
 		hourlyHeader.font = .app17Semibold
 
 		let hourlyLayout = UICollectionViewFlowLayout()
@@ -62,7 +60,7 @@ final class WeatherViewController: UIViewController {
 
 		// 3‑day forecast
 		let dailyHeader = UILabel()
-		dailyHeader.text = NSLocalizedString("3-day forecast", comment: "3-day forecast header")
+		dailyHeader.text = String(localized: "3-day forecast")
 		dailyHeader.font = .app17Semibold
 
 		let dailyLayout = UICollectionViewFlowLayout()
@@ -122,13 +120,12 @@ final class WeatherViewController: UIViewController {
 
 	// MARK: - UI Update
 
-	@objc
-	private func updateLoadingUI() {
-		stateView.isLoading = model.isLoading
-	}
+	override func updateProperties() {
+		if #available(iOS 26, *) {
+			super.updateProperties()
+		}
 
-	@objc
-	private func updateUI() {
+		stateView.isLoading = model.isLoading
 		switch model.weather {
 		case let .success(weather):
 			// Current
@@ -153,6 +150,13 @@ final class WeatherViewController: UIViewController {
 		case .none:
 			break
 		}
+	}
+
+	override func viewWillLayoutSubviews() {
+		if #unavailable(iOS 26) {
+			updateProperties()
+		}
+		super.viewWillLayoutSubviews()
 	}
 }
 
