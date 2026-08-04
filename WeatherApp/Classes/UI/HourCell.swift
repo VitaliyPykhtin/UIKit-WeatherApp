@@ -5,8 +5,8 @@
 //  Created by Vitaliy Pykhtin on 12.03.2026.
 //
 
+import Domain
 import UIKit
-import Model
 
 class HourCell: UICollectionViewCell {
 	static let id = "HourCell"
@@ -58,3 +58,21 @@ class HourCell: UICollectionViewCell {
 		iconView.image = image
 	}
 }
+
+#if DEBUG
+import Mocks
+
+#Preview {
+	let cell = HourCell()
+	cell.configure(with: .fixture, image: UIImage(systemName: "sun.max.fill")!)
+
+	cell.translatesAutoresizingMaskIntoConstraints = false
+
+	NSLayoutConstraint.activate([
+		cell.widthAnchor.constraint(equalToConstant: 80),
+		cell.heightAnchor.constraint(equalToConstant: 120),
+	])
+
+	return cell
+}
+#endif

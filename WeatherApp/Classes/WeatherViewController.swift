@@ -5,9 +5,10 @@
 //  Created by Vitaliy Pykhtin on 12.03.2026.
 //
 
+import Data
+import Domain
+import Presentation
 import UIKit
-import Model
-import ServiceImplementations
 
 final class WeatherViewController: UIViewController {
 	private let model = Model(services: Services())

@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D0979AFE2F658CBE00425159 /* WeatherLib in Frameworks */ = {isa = PBXBuildFile; productRef = D0979AFD2F658CBE00425159 /* WeatherLib */; };
+		D09D87743021CE1300BC63EA /* WeatherKit in Frameworks */ = {isa = PBXBuildFile; productRef = D09D87733021CE1300BC63EA /* WeatherKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,7 +70,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D0979AFE2F658CBE00425159 /* WeatherLib in Frameworks */,
+				D09D87743021CE1300BC63EA /* WeatherKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -134,13 +134,14 @@
 			buildRules = (
 			);
 			dependencies = (
+				D0B489803022F6CF00409B53 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				D0F523612F629AD900E97DDB /* WeatherApp */,
 			);
 			name = WeatherApp;
 			packageProductDependencies = (
-				D0979AFD2F658CBE00425159 /* WeatherLib */,
+				D09D87733021CE1300BC63EA /* WeatherKit */,
 			);
 			productName = WeatherApp;
 			productReference = D0F5235F2F629AD900E97DDB /* WeatherApp.app */;
@@ -200,7 +201,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2630;
-				LastUpgradeCheck = 2630;
+				LastUpgradeCheck = 2660;
 				TargetAttributes = {
 					D0F5235E2F629AD900E97DDB = {
 						CreatedOnToolsVersion = 26.3;
@@ -286,6 +287,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		D0B489803022F6CF00409B53 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = D0B4897F3022F6CF00409B53 /* WeatherKitMocks */;
+		};
 		D0F523772F629ADA00E97DDB /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D0F5235E2F629AD900E97DDB /* WeatherApp */;
@@ -319,6 +324,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 0.1;
+				OTHER_LDFLAGS = "${BUILT_PRODUCTS_DIR}/Mocks.o";
 				PRODUCT_BUNDLE_IDENTIFIER = com.vitaliypykhtin.WeatherApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -372,6 +378,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -432,6 +439,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -443,6 +451,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -496,6 +505,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
@@ -628,9 +638,13 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		D0979AFD2F658CBE00425159 /* WeatherLib */ = {
+		D09D87733021CE1300BC63EA /* WeatherKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = WeatherLib;
+			productName = WeatherKit;
+		};
+		D0B4897F3022F6CF00409B53 /* WeatherKitMocks */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = WeatherKitMocks;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -5,7 +5,7 @@
 //  Created by Vitaliy Pykhtin on 13.03.2026.
 //
 
-import Model
+import Domain
 import UIKit
 
 @MainActor

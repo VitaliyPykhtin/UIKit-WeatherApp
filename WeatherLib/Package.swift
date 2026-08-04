@@ -8,34 +8,38 @@ let package = Package(
 	platforms: [.iOS(.v18)],
 	products: [
 		.library(
-			name: "WeatherLib",
-			targets: ["Model", "ServiceImplementations"],
+			name: "WeatherKit",
+			targets: ["Presentation", "Data"],
 		),
 		.library(
-			name: "MockServiceImplementations",
-			targets: ["MockServiceImplementations"],
+			name: "WeatherKitMocks",
+			targets: ["Mocks"],
 		),
 	],
 	targets: [
 		.target(
-			name: "Model",
-			dependencies: ["Toolbox"],
+			name: "Presentation",
+			dependencies: ["Domain", "Toolbox"],
 			swiftSettings: [.defaultIsolation(MainActor.self)]
 		),
 		.target(
-			name: "ServiceImplementations",
-			dependencies: ["Model", "Toolbox"],
+			name: "Domain",
+			dependencies: ["Toolbox"], //TODO: Remove dependency by implementing data layer mapper
+		),
+		.target(
+			name: "Data",
+			dependencies: ["Domain", "Toolbox"],
 		),
 		.target(
 			name: "Toolbox",
 		),
 		.target(
-			name: "MockServiceImplementations",
-			dependencies: ["Model", "Toolbox"],
+			name: "Mocks",
+			dependencies: ["Domain", "Presentation"],
 		),
 		.testTarget(
 			name: "WeatherLibTests",
-			dependencies: ["MockServiceImplementations", "Model"],
+			dependencies: ["Mocks", "Presentation"],
 		),
 	],
 )

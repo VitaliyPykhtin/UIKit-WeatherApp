@@ -5,12 +5,10 @@
 //  Created by Vitaliy Pykhtin on 13.03.2026.
 //
 
+import Domain
 import UIKit
-import Model
 
 class DayCell: UICollectionViewCell {
-	static let id = "DayCell"
-
 	private let dateLabel = UILabel()
 	private let iconView = UIImageView()
 	private let tempRangeLabel = UILabel()
@@ -56,3 +54,21 @@ class DayCell: UICollectionViewCell {
 		iconView.image = image
 	}
 }
+
+#if DEBUG
+import Mocks
+
+#Preview {
+	let cell = DayCell()
+	cell.configure(with: .fixture, image: UIImage(systemName: "sun.max.fill")!)
+
+	cell.translatesAutoresizingMaskIntoConstraints = false
+
+	NSLayoutConstraint.activate([
+		cell.widthAnchor.constraint(equalToConstant: 120),
+		cell.heightAnchor.constraint(equalToConstant: 200),
+	])
+
+	return cell
+}
+#endif

@@ -5,7 +5,7 @@
 //  Created by Vitaliy Pykhtin on 14.03.2026.
 //
 
-public import Model
+public import Domain
 import Toolbox
 import UIKit
 

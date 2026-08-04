@@ -5,8 +5,8 @@
 //  Created by Vitaliy Pykhtin on 13.03.2026.
 //
 
+import Domain
 import UIKit
-import Model
 
 /// CurrentWeatherView (location / temp / icon / wind & humidity)
 final class CurrentWeatherView: UIView {

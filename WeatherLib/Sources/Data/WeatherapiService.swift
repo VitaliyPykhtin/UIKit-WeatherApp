@@ -5,8 +5,8 @@
 //  Created by Vitaliy Pykhtin on 12.03.2026.
 //
 
+import Domain
 import Foundation
-import Model
 import Toolbox
 
 struct WeatherapiService: NetworkService {

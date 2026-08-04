@@ -8,6 +8,7 @@
 package import Toolbox
 package import UIKit
 
+@MainActor
 package protocol DownloadService: Sendable {
 	/// Загружает изображение.
 	/// Возвращается placeholder сразу, а после загрузки – вызывается `update` для всех
@@ -15,7 +16,7 @@ package protocol DownloadService: Sendable {
 	func loadImage(from url: URL, update: @escaping (UIImage) -> Void) -> UIImage
 }
 
-nonisolated package protocol NetworkService: Sendable {
+package protocol NetworkService: Sendable {
 	/// Получить текущую погоду по координатам.
 	///
 	/// - Parameters:
@@ -36,9 +37,9 @@ nonisolated package protocol NetworkService: Sendable {
 	func fetchForecast(latitude: Double, longitude: Double, days: Int) async throws -> DTOForecastResponse
 }
 
-nonisolated public struct Services {
-	let networkService: any NetworkService
-	let downloadService: any DownloadService
+public struct Services {
+	package let networkService: any NetworkService
+	package let downloadService: any DownloadService
 
 	package init(networkService: some NetworkService, downloadService: some DownloadService) {
 		self.networkService = networkService
