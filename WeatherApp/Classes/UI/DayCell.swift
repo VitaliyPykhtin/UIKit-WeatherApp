@@ -8,10 +8,12 @@
 import Domain
 import UIKit
 
-class DayCell: UICollectionViewCell {
+final class DayCell: UICollectionViewCell {
 	private let dateLabel = UILabel()
 	private let iconView = UIImageView()
 	private let tempRangeLabel = UILabel()
+
+	// MARK: - Lificycle
 
 	override init(frame: CGRect) {
 		super.init(frame: frame)
@@ -47,6 +49,8 @@ class DayCell: UICollectionViewCell {
 	}
 
 	required init?(coder: NSCoder) { fatalError() }
+
+	// MARK: - Logic
 
 	func configure(with model: DayWeather, image: UIImage) {
 		dateLabel.text = model.date.formatted(date: .numeric, time: .omitted)

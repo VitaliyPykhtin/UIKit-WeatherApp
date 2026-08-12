@@ -9,9 +9,6 @@ import UIKit
 
 /// StateView (loading / error / retry)
 final class StateView: UIView {
-
-	// MARK: - Subviews
-
 	private let activityIndicator = UIActivityIndicatorView(style: .large)
 	private let errorLabel = UILabel()
 	private let retryButton = UIButton(configuration: {
@@ -24,7 +21,16 @@ final class StateView: UIView {
 		return config
 	}())
 
-	// MARK: - Public API
+	// MARK: - Lifecycle
+
+	override init(frame: CGRect) {
+		super.init(frame: frame)
+		setup()
+	}
+
+	required init?(coder: NSCoder) { fatalError() }
+
+	// MARK: - Logic
 
 	var isLoading: Bool {
 		get {
@@ -63,23 +69,21 @@ final class StateView: UIView {
 		}
 	}
 
-	// MARK: Init
-	override init(frame: CGRect) {
-		super.init(frame: frame)
-		setup()
-	}
+}
 
-	required init?(coder: NSCoder) { fatalError() }
+extension StateView {
+	// MARK: - Setup
 
-	// MARK: Setup
 	private func setup() {
 		errorLabel.font = .app12
 		errorLabel.numberOfLines = 0
 		errorLabel.textAlignment = .center
 		errorLabel.isHidden = true
+
 		retryButton.isHidden = true
 
 		let stack = UIStackView(arrangedSubviews: [activityIndicator, errorLabel, retryButton])
+		stack.preservesSuperviewLayoutMargins = true
 		stack.axis = .vertical
 		stack.alignment = .center
 		addSubview(stack)
@@ -87,9 +91,9 @@ final class StateView: UIView {
 		stack.translatesAutoresizingMaskIntoConstraints = false
 
 		let bindings: [String : UIView] = ["stack" : stack]
-		var constraints = NSLayoutConstraint.constraints(withVisualFormat: "V:|[stack]|",
+		var constraints = NSLayoutConstraint.constraints(withVisualFormat: "|-[stack]-|",
 													  metrics: nil, views: bindings)
-		constraints += NSLayoutConstraint.constraints(withVisualFormat: "H:|[stack]|",
+		constraints += NSLayoutConstraint.constraints(withVisualFormat: "V:|-[stack]-|",
 													  metrics: nil, views: bindings)
 		NSLayoutConstraint.activate(constraints)
 	}

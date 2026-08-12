@@ -8,14 +8,14 @@
 import Domain
 import UIKit
 
-class HourCell: UICollectionViewCell {
-	static let id = "HourCell"
-
+final class HourCell: UICollectionViewCell {
 	private let timeLabel = UILabel()
 	private let iconView = UIImageView()
 	private let tempLabel = UILabel()
 
 	private let timeStyle = Date.FormatStyle().hour().minute()
+
+	// MARK: - Lifecycle
 
 	override init(frame: CGRect) {
 		super.init(frame: frame)
@@ -43,14 +43,16 @@ class HourCell: UICollectionViewCell {
 		iconView.setContentCompressionResistancePriority(.defaultHigh - 1, for: .vertical)
 
 		let bindings: [String : UIView] = ["stack" : stack]
-		var constraints = NSLayoutConstraint.constraints(withVisualFormat: "V:|-[stack]-|",
+		var constraints = NSLayoutConstraint.constraints(withVisualFormat: "|-[stack]-|",
 													  metrics: nil, views: bindings)
-		constraints += NSLayoutConstraint.constraints(withVisualFormat: "H:|-[stack]-|",
+		constraints += NSLayoutConstraint.constraints(withVisualFormat: "V:|-[stack]-|",
 													  metrics: nil, views: bindings)
 		NSLayoutConstraint.activate(constraints)
 	}
 
 	required init?(coder: NSCoder) { fatalError() }
+
+	// MARK: - Logic
 
 	func configure(with model: HourWeather, image: UIImage) {
 		timeLabel.text = model.time.formatted(timeStyle)

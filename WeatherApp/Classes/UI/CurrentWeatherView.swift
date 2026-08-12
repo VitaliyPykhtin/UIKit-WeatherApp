@@ -10,13 +10,12 @@ import UIKit
 
 /// CurrentWeatherView (location / temp / icon / wind & humidity)
 final class CurrentWeatherView: UIView {
-    // MARK: Subviews
     private let locationLabel = UILabel()
     private let tempLabel      = UILabel()
     private let conditionImageView = UIImageView()
     private let windHumidityLabel  = UILabel()
 
-    // MARK: Init
+    // MARK: - Lifecycle
 
 	override init(frame: CGRect) {
 		super.init(frame: frame)
@@ -25,7 +24,8 @@ final class CurrentWeatherView: UIView {
 
     required init?(coder: NSCoder) { fatalError() }
 
-    // MARK: Setup
+	// MARK: - Setup
+
     private func setup() {
 		isHidden = true
 
@@ -49,12 +49,14 @@ final class CurrentWeatherView: UIView {
 		stack.translatesAutoresizingMaskIntoConstraints = false
 
 		let bindings: [String : UIView] = ["stack" : stack]
-		var constraints = NSLayoutConstraint.constraints(withVisualFormat: "V:|[stack]|",
+		var constraints = NSLayoutConstraint.constraints(withVisualFormat: "V:|-[stack]-|",
 													  metrics: nil, views: bindings)
-		constraints += NSLayoutConstraint.constraints(withVisualFormat: "H:|[stack]|",
+		constraints += NSLayoutConstraint.constraints(withVisualFormat: "H:|-[stack]-|",
 													  metrics: nil, views: bindings)
 		NSLayoutConstraint.activate(constraints)
     }
+
+	// MARK: - Logic
 
 	func configure(with model: CurrentWeather, image: UIImage) {
 		isHidden = false
@@ -65,4 +67,3 @@ final class CurrentWeatherView: UIView {
 		conditionImageView.image = image
 	}
 }
-
