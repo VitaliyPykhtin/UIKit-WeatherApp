@@ -9,7 +9,7 @@
 public import Foundation
 package import Toolbox
 
-public struct CurrentWeather {
+public struct CurrentWeather: Equatable {
 	public let location: String
 	public let humidity: Int
 	public let temperature: Measurement<UnitTemperature>

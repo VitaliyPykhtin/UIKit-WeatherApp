@@ -5,33 +5,37 @@
 //  Created by Vitaliy Pykhtin on 12.03.2026.
 //
 
-import Data
 import Domain
 import Presentation
 import UIKit
 
-final class WeatherViewController: UIViewController {
-	private let model = Model(services: Services())
+final class WeatherViewController: UICollectionViewController {
+	private let model: Model
 
-	// Loading / error
-	private let stateView = StateView()
+	private var appliedState: Weather?
+	private var pendingState: Weather?
+	private var isApplyingSnapshot = false
 
 	// Current weather section
 	private let currentWeatherView = CurrentWeatherView()
 
-	// Hourly forecast (collection view)
-	@ViewLoading private var collectionView: UICollectionView
 	@ViewLoading private var dataSource: UICollectionViewDiffableDataSource<Section, Item>
 
 	// MARK: - Lifecycle
+
+	init(model: Model) {
+		self.model = model
+		super.init(collectionViewLayout: WeatherViewController.collectionLayout)
+	}
+	
+	required init?(coder: NSCoder) {
+		fatalError("init(coder:) has not been implemented")
+	}
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
 
 		setupPresentation()
-
-		let model = model
-		stateView.onRetry = UIAction { _ in model.fetchWeather() }
 		// Diffable data sources
 		setupDataSource()
 
@@ -43,28 +47,37 @@ final class WeatherViewController: UIViewController {
 			super.updateProperties()
 		}
 
-		stateView.isLoading = model.isLoading
 		switch model.weather {
 		case let .success(weather):
-			collectionView.isHidden = false
-			// Current
-			let image = model.loadImage(from: weather.current.iconURL) { [weak self] currentImage in
-				if case let .success(currentWeather) = self?.model.weather {
-					self?.currentWeatherView.configure(with: currentWeather.current, image: currentImage)
-				}
-			}
-			currentWeatherView.configure(with: weather.current, image: image)
-			// Hourly
-			var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
-			snapshot.appendSections(Section.allCases)
-			snapshot.appendItems(weather.hourly.map(Item.hourly), toSection: .hourly)
-			snapshot.appendItems(weather.forecast.map(Item.daily), toSection: .daily)
-			dataSource.apply(snapshot, animatingDifferences: true)
-		case let .failure(error):
-			stateView.errorMessage = error.localizedDescription
-		case .none:
+			pendingState = weather
+
+			applyPendingStateIfNeeded()
+		default:
 			break
 		}
+	}
+
+	override func updateContentUnavailableConfiguration(using state: UIContentUnavailableConfigurationState) {
+		var config: UIContentUnavailableConfiguration?
+		switch model.weather {
+		case let .failure(error):
+			let model = model
+			
+			var buttonConfig = if #available(iOS 26.0, *) {
+				UIButton.Configuration.prominentGlass()
+			} else {
+				UIButton.Configuration.borderedProminent()
+			}
+			buttonConfig.title = String(localized: "Retry")
+
+			config = .empty()
+			config?.text = error.localizedDescription
+			config?.button = buttonConfig
+			config?.buttonProperties.primaryAction = UIAction { _ in model.fetchWeather() }
+		default:
+			config = model.isLoading ? .loading() : nil
+		}
+		contentUnavailableConfiguration = config
 	}
 
 	override func viewWillLayoutSubviews() {
@@ -82,27 +95,14 @@ private extension WeatherViewController {
 	func setupPresentation() {
 		view.backgroundColor = .appBackground
 
-		collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: collectionLayout)
 		collectionView.preservesSuperviewLayoutMargins = true
-		collectionView.isHidden = true
-
-		let contentStack = UIStackView(arrangedSubviews: [
-			stateView,
-			collectionView,
-		])
-		contentStack.frame = view.bounds
-		contentStack.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-		contentStack.preservesSuperviewLayoutMargins = true
-		contentStack.axis = .vertical
-		contentStack.spacing = 16
-		view.addSubview(contentStack)
 	}
 
 	// MARK: Layout
 
-	var collectionLayout: UICollectionViewLayout {
+	static var collectionLayout: UICollectionViewLayout {
 		let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1),
-													 heightDimension: .estimated(207))
+													 heightDimension: .estimated(223))
 
 		let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize,
 																 elementKind: Section.collectionHeader,
@@ -226,6 +226,41 @@ private extension WeatherViewController {
 			default:
 				collectionView.dequeueConfiguredReusableSupplementary(using: headerRegistration, for: indexPath)
 			}
+		}
+	}
+
+	func applyPendingStateIfNeeded() {
+		guard !isApplyingSnapshot, let state = pendingState else {
+			return
+		}
+
+		guard state != appliedState else {
+			pendingState = nil
+			return
+		}
+
+		pendingState = nil
+		isApplyingSnapshot = true
+
+		let image = model.loadImage(from: state.current.iconURL) { [weak self] currentImage in
+			if case let .success(currentWeather) = self?.model.weather {
+				self?.currentWeatherView.configure(with: currentWeather.current, image: currentImage)
+			}
+		}
+		currentWeatherView.configure(with: state.current, image: image)
+
+		var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
+		snapshot.appendSections(Section.allCases)
+		snapshot.appendItems(state.hourly.map(Item.hourly), toSection: .hourly)
+		snapshot.appendItems(state.forecast.map(Item.daily), toSection: .daily)
+		dataSource.apply(snapshot, animatingDifferences: true) { [weak self] in
+			guard let self else { return }
+
+			self.appliedState = state
+			self.isApplyingSnapshot = false
+
+			// If state changed during animation, applying latest pending state.
+			self.applyPendingStateIfNeeded()
 		}
 	}
 

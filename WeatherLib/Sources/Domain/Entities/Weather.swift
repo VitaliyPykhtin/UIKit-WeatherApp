@@ -9,7 +9,7 @@
 public import CoreLocation
 package import Toolbox
 
-public struct Weather {
+public struct Weather: Equatable {
 	public let location: CLLocation
 	public let current: CurrentWeather
 	public let hourly: [HourWeather]

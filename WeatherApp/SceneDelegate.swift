@@ -5,6 +5,9 @@
 //  Created by Vitaliy Pykhtin on 12.03.2026.
 //
 
+import Data
+import Domain
+import Presentation
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -19,7 +22,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 		guard let windowScene = (scene as? UIWindowScene) else { return }
 		
 		window = UIWindow(windowScene: windowScene)
-		window?.rootViewController = WeatherViewController()
+		window?.rootViewController = WeatherViewController(model: Model(services: Services()))
 		window?.makeKeyAndVisible()
 	}
 
